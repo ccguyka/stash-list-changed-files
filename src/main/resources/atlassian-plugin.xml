@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<atlassian-plugin key="${project.groupId}.${project.artifactId}"
+	name="${project.name}" plugins-version="2">
+	<plugin-info>
+		<description>${project.description}</description>
+		<version>${project.version}</version>
+		<vendor name="${project.organization.name}" url="${project.organization.url}" />
+		<param name="plugin-icon">images/pluginIcon.png</param>
+		<param name="plugin-logo">images/pluginLogo.png</param>
+	</plugin-info>
+
+	<component-import key="commitService" interface="com.atlassian.stash.commit.CommitService"/>
+	<component-import key="pullrequestservice" interface="com.atlassian.stash.pull.PullRequestService"/>
+
+	<component key="pullRequestListener" class="org.ccguyka.listener.PullRequestListener" />
+</atlassian-plugin>
