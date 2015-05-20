@@ -1,6 +1,7 @@
 package org.ccguyka.listener;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import com.atlassian.event.api.EventListener;
@@ -24,6 +25,7 @@ import com.atlassian.stash.util.PageRequestImpl;
 import com.atlassian.stash.util.PagedIterable;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class PullRequestListener {
 
@@ -59,17 +61,33 @@ public class PullRequestListener {
     }
 
 	private void update(PullRequest pullRequest) {
-		Set<String> commitIds = getCommitIds(pullRequest);
+
+		updateUsingCommits(pullRequest);
+	}
+
+	private void updateUsingCommits(PullRequest pullRequest) {
+
+		System.out.println("changes in pr: " + pullRequest.getId());
+		List<String> commitIds = getCommitIds(pullRequest);
+		System.out.println("Commits:");
+		for (String commitId : commitIds) {
+			System.out.println(commitId);
+		}
 
 		Iterable<Change> changes = getChanges(pullRequest, commitIds);
 		for (Change change : changes) {
 			String name = change.getPath().getName();
 			ChangeType changeType = change.getType();
+			System.out.println("File: " + name + ", mod: " + changeType);
 		}
+
+		//add srcPath = null;     fromContentId = 000000....0000;
+		//mod srcPath = null;     fromContentId = hash;
+		//mov srcPath = old path; fromContentId = hash;
 	}
 
 	private Iterable<Change> getChanges(PullRequest pullRequest,
-			Set<String> commitIds) {
+			List<String> commitIds) {
 		final Repository repository = pullRequest.getFromRef().getRepository();
 		Iterable<Changeset> changesets = getChangesets(repository, commitIds);
 		Iterable<Change> changes = Iterables.concat(Iterables.transform(
@@ -77,12 +95,12 @@ public class PullRequestListener {
 		return changes;
 	}
 
-	private Set<String> getCommitIds(PullRequest pullRequest) {
+	private List<String> getCommitIds(PullRequest pullRequest) {
 		Iterable<Commit> commits = getCommits(pullRequest);
-		Set<String> commitIds = new HashSet<String>();
+		List<String> commitIds = new ArrayList<String>();
 		Iterables.addAll(commitIds, Iterables.transform(commits, COMMIT_ID));
 
-		return commitIds;
+		return Lists.reverse(commitIds);
 	}
 
 	private Iterable<Commit> getCommits(final PullRequest pullRequest) {
